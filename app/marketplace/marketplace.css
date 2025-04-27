@@ -1,0 +1,167 @@
+/* Card effects */
+.holographic-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.holographic-effect::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    125deg,
+    rgba(255, 0, 0, 0.05) 0%,
+    rgba(255, 255, 0, 0.05) 14%,
+    rgba(0, 255, 0, 0.05) 28%,
+    rgba(0, 255, 255, 0.05) 42%,
+    rgba(0, 0, 255, 0.05) 56%,
+    rgba(255, 0, 255, 0.05) 70%,
+    rgba(255, 0, 0, 0.05) 84%,
+    rgba(255, 255, 0, 0.05) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.holographic-effect:hover::before {
+  opacity: 1;
+  animation: holographic 3s linear infinite;
+}
+
+@keyframes holographic {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 100%;
+  }
+}
+
+.full-art-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.full-art-effect::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.full-art-effect:hover::before {
+  opacity: 1;
+  animation: fullArt 2s ease infinite;
+}
+
+@keyframes fullArt {
+  0% {
+    transform: translateX(-100%) translateY(-100%);
+  }
+  50% {
+    transform: translateX(100%) translateY(100%);
+  }
+  100% {
+    transform: translateX(-100%) translateY(-100%);
+  }
+}
+
+.gold-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.gold-effect::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(45deg, rgba(255, 215, 0, 0) 0%, rgba(255, 215, 0, 0.1) 50%, rgba(255, 215, 0, 0) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.gold-effect:hover::before {
+  opacity: 1;
+  animation: goldShine 2s ease infinite;
+}
+
+@keyframes goldShine {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  50% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+}
+
+.reverse-holo-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.reverse-holo-effect::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 10%,
+    rgba(255, 255, 255, 0) 20%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.reverse-holo-effect:hover::before {
+  opacity: 1;
+  animation: reverseHolo 3s linear infinite;
+}
+
+@keyframes reverseHolo {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 100%;
+  }
+}
+
+/* 3D Card Effect */
+.perspective-card {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease;
+}
+
+.transform-card:hover {
+  transform: translateY(-8px);
+}
+
+/* Hide scrollbar but allow scrolling */
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
