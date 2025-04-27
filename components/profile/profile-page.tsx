@@ -55,6 +55,16 @@ export function ProfilePage() {
     window.addEventListener("scroll", handleScroll)
   }
 
+  // Check if user and createdAt exist before formatting the date
+  const joinDateString = user?.createdAt 
+    ? `Member Since ${getMonthName(user.createdAt.getUTCMonth())} ${user.createdAt.getFullYear()}` 
+    : "Loading join date..."; // Or some placeholder
+
+  // Check if wallets array has at least one wallet before accessing it
+  const displayAddress = wallets && wallets.length > 0 
+    ? `${wallets[0].address.slice(0, 4)}...${wallets[0].address.slice(-4)}` 
+    : "Loading address..."; // Or some placeholder
+
   return (
     <div className="min-h-screen pt-32 pb-20 bg-white dark:bg-[#131525] relative overflow-hidden">
       {/* Subtle background pattern */}
@@ -100,7 +110,7 @@ export function ProfilePage() {
               )}
             </div>
             <div className="flex flex-col md:flex-row items-center gap-1 md:gap-4 text-[14px] text-[#121F3D]/70 dark:text-[#B6B8CF] mb-4">
-              <span>Member Since {getMonthName(Number(user?.createdAt.getUTCMonth()))} {user?.createdAt.getFullYear()}</span>
+              <span>{joinDateString}</span>
               <span className="hidden md:inline">•</span>
               <span>{userData.location}</span>
             </div>
@@ -128,7 +138,7 @@ export function ProfilePage() {
               variant="outline"
               className="rounded-full border-[#E4E1FF] dark:border-[#352F7E] text-[#121F3D]/70 dark:text-[#B6B8CF] hover:bg-[#F9F9FB] dark:hover:bg-[#1A1C36]"
             >
-              {wallets[0].address.slice(0, 4)}...{wallets[0].address.slice(-4)}
+              {displayAddress}
               <ExternalLink className="ml-2 h-3 w-3" />
             </Button>
             <Button
