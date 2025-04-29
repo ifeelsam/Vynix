@@ -1,5 +1,6 @@
 'use client';
 
+import { pharosChainRpc } from '@/components/store/config';
 import { PrivyProvider } from '@privy-io/react-auth';
 
 export default function Provider({ children }: { children: React.ReactNode }) {
@@ -11,7 +12,8 @@ export default function Provider({ children }: { children: React.ReactNode }) {
           landingHeader: "Vynix",
           loginMessage: "Log in or Sign up to Vynix"
         },
-        
+        supportedChains: [pharosChainRpc],
+        defaultChain: pharosChainRpc,
         embeddedWallets: {
           createOnLogin: 'all-users',
         },
