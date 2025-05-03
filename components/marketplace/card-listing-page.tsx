@@ -53,9 +53,34 @@ const blockchains = [
   { id: "flow", name: "Flow" },
 ]
 
+// --- Pinata Config (Read from .env) ---
+// WARNING: Exposing secrets client-side is insecure. Use a backend API route in production.
+const PINATA_API_KEY = process.env.NEXT_PUBLIC_API_KEY;
+const PINATA_SECRET_API_KEY = process.env.NEXT_PUBLIC_API_SECRET; // Ideally use PINATA_JWT
+const PINATA_JWT = process.env.NEXT_PUBLIC_API_JWT; // Preferred method
+
+// Function to convert Data URL to Blob
+function dataURLtoBlob(dataurl: string): Blob | null {
+    const arr = dataurl.split(',');
+    if (arr.length < 2) return null;
+    const mimeMatch = arr[0].match(/:(.*?);/);
+    if (!mimeMatch || mimeMatch.length < 2) return null;
+    const mime = mimeMatch[1];
+    const bstr = atob(arr[arr.length - 1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while(n--){
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], {type:mime});
+}
+
 export function CardListingPage() {
   const [currentStep, setCurrentStep] = useState(1)
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
+  const [imageCid, setImageCid] = useState<string | null>(null); // State for image CID
+  const [isUploading, setIsUploading] = useState(false); // State for upload status
+  const [uploadError, setUploadError] = useState<string | null>(null); // State for upload error
   const [isProcessing, setIsProcessing] = useState(false)
   const [processingProgress, setProcessingProgress] = useState(0)
   const [processingStep, setProcessingStep] = useState("")
@@ -65,24 +90,103 @@ export function CardListingPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // --- Pinata Upload Helper ---
+  const uploadToPinata = async (file: File | Blob, fileName: string): Promise<string | null> => {
+    setIsUploading(true);
+    setUploadError(null);
+    console.log("Starting Pinata upload for:", fileName);
+
+    if (!PINATA_JWT) {
+        console.error("Pinata JWT not found in environment variables.");
+        setUploadError("Pinata configuration is missing. Cannot upload.");
+        setIsUploading(false);
+        return null;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file, fileName);
+
+    const pinataMetadata = JSON.stringify({
+      name: fileName,
+      // Add any keyvalues here if needed
+    });
+    formData.append('pinataMetadata', pinataMetadata);
+
+    const pinataOptions = JSON.stringify({
+      cidVersion: 1, // Use CID version 1
+    })
+    formData.append('pinataOptions', pinataOptions);
+
+    try {
+      const res = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${PINATA_JWT}`,
+          // 'Content-Type': 'multipart/form-data' // Fetch sets this automatically with FormData
+        },
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errorData = await res.text();
+        console.error("Pinata API Error:", res.status, errorData);
+        throw new Error(`Pinata upload failed: ${res.statusText} - ${errorData}`);
+      }
+
+      const result = await res.json();
+      console.log("Pinata upload successful:", result);
+      setIsUploading(false);
+      return result.IpfsHash; // This is the CID
+    } catch (error: any) {
+      console.error("Error uploading to Pinata:", error);
+      setUploadError(`Upload failed: ${error.message}`);
+      setIsUploading(false);
+      return null;
+    }
+  };
+
+  // --- Modified Image Handlers ---
+
+  const processUploadedFile = async (file: File) => {
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const imageDataUrl = event.target?.result as string;
+      setUploadedImage(imageDataUrl);
+      setUploadError(null); // Clear previous errors
+
+      // Upload to Pinata
+      const cid = await uploadToPinata(file, `card-image-${Date.now()}-${file.name}`);
+      if (cid) {
+        setImageCid(cid);
+        console.log("Image uploaded to Pinata, CID:", cid);
+        simulateProcessing(); // Start AI processing after successful upload
+      } else {
+        // Handle upload failure (e.g., show error message, prevent proceeding)
+        console.error("Failed to upload image to Pinata.");
+        // Optionally reset uploaded image state if upload fails
+        // setUploadedImage(null);
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
   // Handle file upload
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        setUploadedImage(event.target?.result as string)
-        simulateProcessing()
-      }
-      reader.readAsDataURL(file)
+      processUploadedFile(file);
     }
   }
 
   // Simulate the processing of the card image
   const simulateProcessing = () => {
+    // Reset processing state in case of re-upload
     setIsProcessing(true)
     setProcessingStep("Detecting card")
     setProcessingProgress(0)
+    setCurrentStep(1); // Ensure we are showing step 1 progress indicator
+    setExtractedData(null); // Clear previous data
+    setConfidence(0);
 
     // Simulate the different steps of processing
     setTimeout(() => {
@@ -116,7 +220,12 @@ export function CardListingPage() {
       })
 
       setConfidence(92)
-      setCurrentStep(2)
+       // Only move to step 2 if processing is complete AND we have an image CID
+       if (imageCid) {
+           setCurrentStep(2)
+       } else {
+            setUploadError("Processing complete, but image upload failed earlier. Please re-upload.");
+       }
     }, 4500)
   }
 
@@ -129,12 +238,7 @@ export function CardListingPage() {
     e.preventDefault()
     const file = e.dataTransfer.files?.[0]
     if (file) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        setUploadedImage(event.target?.result as string)
-        simulateProcessing()
-      }
-      reader.readAsDataURL(file)
+       processUploadedFile(file);
     }
   }
 
@@ -207,7 +311,7 @@ export function CardListingPage() {
           videoElement.srcObject = stream
 
           // Handle capture button click
-          captureButton.onclick = () => {
+          captureButton.onclick = async () => { // Make async
             // Set canvas dimensions to match the video
             canvasElement.width = videoElement.videoWidth
             canvasElement.height = videoElement.videoHeight
@@ -218,17 +322,35 @@ export function CardListingPage() {
 
             // Convert the canvas to a data URL
             const imageDataUrl = canvasElement.toDataURL("image/png")
+             const blob = dataURLtoBlob(imageDataUrl); // Convert to Blob
 
-            // Set the captured image
-            setUploadedImage(imageDataUrl)
-
-            // Start processing the image
-            simulateProcessing()
-
-            // Clean up
+            // Clean up stream and modal *before* async upload
             const tracks = stream.getTracks()
             tracks.forEach((track) => track.stop())
             document.body.removeChild(modal)
+
+            if (blob) {
+                // Set the captured image for preview
+                 setUploadedImage(imageDataUrl);
+                 setUploadError(null); // Clear previous errors
+
+                 const file = new File([blob], `card-capture-${Date.now()}.png`, { type: 'image/png' });
+
+                 // Upload to Pinata
+                 const cid = await uploadToPinata(file, file.name);
+                 if (cid) {
+                     setImageCid(cid);
+                     console.log("Captured image uploaded to Pinata, CID:", cid);
+                     simulateProcessing(); // Start AI processing after successful upload
+                 } else {
+                    console.error("Failed to upload captured image to Pinata.");
+                    // Optionally reset uploaded image state if upload fails
+                    // setUploadedImage(null);
+                 }
+            } else {
+                console.error("Could not convert canvas to Blob.");
+                setUploadError("Failed to process captured image.");
+            }
           }
 
           // Handle close button click
@@ -242,7 +364,9 @@ export function CardListingPage() {
         .catch((error) => {
           console.error("Error accessing camera:", error)
           alert("Could not access the camera. Please make sure you have granted camera permissions.")
-          document.body.removeChild(modal)
+           if (modal.parentNode === document.body) {
+               document.body.removeChild(modal); // Ensure modal is removed on error
+           }
         })
     } else {
       alert("Your browser does not support camera access. Please try uploading an image instead.")
@@ -261,13 +385,81 @@ export function CardListingPage() {
 
   // Handle proceed to listing
   const handleProceedToListing = () => {
+      if (!imageCid) {
+          alert("Image CID is missing. Cannot proceed. Please ensure the image uploaded correctly.");
+          // Or set an error state to display inline
+          setUploadError("Image CID is missing. Cannot proceed.");
+          return;
+      }
+      if (!extractedData) {
+           alert("Extracted data is missing. Cannot proceed.");
+           return;
+      }
     setCurrentStep(3)
   }
 
-  // Handle submit listing
-  const handleSubmitListing = () => {
-    // In a real app, this would submit the listing to the backend
-    alert("Card successfully listed!")
+  // Handle submit listing (Modified)
+  const handleSubmitListing = async () => { // Make async
+    if (!imageCid || !extractedData) {
+      alert("Missing image data or card details. Cannot list.");
+      return;
+    }
+
+     setIsUploading(true); // Use the same state for metadata upload indication
+     setUploadError(null);
+
+    // --- TODO: Gather all listing details ---
+    // This part needs you to add state management for the listing form (Step 3)
+    // For now, we'll use placeholder values and the extracted data + image CID
+    const listingDetails = {
+        cardName: extractedData.name,
+        cardSet: extractedData.set,
+        cardNumber: extractedData.number,
+        rarity: extractedData.rarity,
+        condition: extractedData.condition,
+        grade: extractedData.grade,
+        attributes: {
+            isFirstEdition: extractedData.isFirstEdition,
+            isHolographic: extractedData.isHolographic,
+        },
+        image: `ipfs://${imageCid}`, // Standard IPFS URI format
+        listingType: "fixed-price", // Placeholder - get from Tabs state
+        price: "12500", // Placeholder - get from Input state
+        currency: "USD", // Placeholder
+        durationDays: 30, // Placeholder - get from Slider state
+        blockchain: "ethereum", // Placeholder - get from Select state
+        royaltiesPercent: 5, // Placeholder - get from Slider state
+        includePhysical: true, // Placeholder - get from Switch state
+        description: "", // Placeholder - get from Textarea state
+        // Add other relevant fields from Step 3 form
+    };
+
+    console.log("Creating metadata JSON:", listingDetails);
+
+    // Create JSON Blob and File
+    const metadataJson = JSON.stringify(listingDetails, null, 2);
+    const metadataBlob = new Blob([metadataJson], { type: 'application/json' });
+    const metadataFile = new File([metadataBlob], `metadata-${extractedData.name}-${Date.now()}.json`, { type: 'application/json' });
+
+    // Upload metadata JSON to Pinata
+    const metadataCid = await uploadToPinata(metadataFile, metadataFile.name);
+
+     setIsUploading(false); // Upload finished (success or fail)
+
+    if (metadataCid) {
+      console.log("Metadata uploaded successfully. CID:", metadataCid);
+      alert(`Card successfully listed!\nImage CID: ${imageCid}\nMetadata CID: ${metadataCid}`);
+      // TODO: Reset form state, navigate away, etc.
+       // Reset potentially sensitive state after successful listing
+       setUploadedImage(null);
+       setImageCid(null);
+       setExtractedData(null);
+       setCurrentStep(1); // Go back to the start
+    } else {
+      console.error("Failed to upload metadata JSON to Pinata.");
+      alert("Failed to upload listing details to Pinata. Please try again.");
+       // Keep state so user can retry without re-uploading image if needed
+    }
   }
 
   return (
@@ -327,6 +519,22 @@ export function CardListingPage() {
           </div>
         </div>
 
+        {/* --- Upload/Processing Overlay --- */}
+        {isUploading && (
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-[9999]">
+                <div className="w-16 h-16 rounded-full border-4 border-white border-t-[#8075FF] animate-spin mb-4"></div>
+                <p className="text-white text-lg font-medium">Uploading to IPFS via Pinata...</p>
+                 {uploadError && <p className="text-red-400 mt-2">{uploadError}</p>}
+            </div>
+        )}
+
+        {/* Display Upload Errors Inline */}
+        {uploadError && !isUploading && (
+            <div className="max-w-3xl mx-auto my-4 p-4 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-300 rounded-lg text-center">
+                <p>{uploadError}</p>
+            </div>
+        )}
+
         {/* Step 1: Upload Card */}
         <AnimatePresence mode="wait">
           {currentStep === 1 && (
@@ -341,10 +549,12 @@ export function CardListingPage() {
                 <div
                   className={cn(
                     "border-2 border-dashed rounded-2xl p-8 text-center transition-all",
-                    uploadedImage ? "border-[#8075FF]" : "border-[#352F7E] hover:border-[#8075FF]/50",
+                    // Dim the dropzone if uploading or processing
+                     (isUploading || isProcessing) ? "border-gray-400 dark:border-gray-600 opacity-70 pointer-events-none" :
+                     (uploadedImage ? "border-[#8075FF]" : "border-[#352F7E] hover:border-[#8075FF]/50"),
                   )}
                   onDragOver={handleDragOver}
-                  onDrop={handleDrop}
+                  onDrop={!isUploading && !isProcessing ? handleDrop : undefined} // Disable drop when busy
                 >
                   {!uploadedImage ? (
                     <div className="flex flex-col items-center">
@@ -360,6 +570,7 @@ export function CardListingPage() {
                         <Button
                           onClick={() => fileInputRef.current?.click()}
                           className="rounded-full bg-gradient-to-r from-[#8075FF] to-[#6C63FF] hover:from-[#6C63FF] hover:to-[#5D51FF] text-[#121F3D] dark:text-white"
+                           disabled={isUploading || isProcessing} // Disable buttons when busy
                         >
                           Browse Files
                         </Button>
@@ -367,6 +578,7 @@ export function CardListingPage() {
                           variant="outline"
                           className="rounded-full border-[#8075FF] text-[#8075FF] hover:bg-[#322F5D]"
                           onClick={handleCameraCapture}
+                           disabled={isUploading || isProcessing} // Disable buttons when busy
                         >
                           <Camera className="h-4 w-4 mr-2" />
                           Use Camera
@@ -395,23 +607,36 @@ export function CardListingPage() {
                           className="object-contain"
                         />
 
-                        {isProcessing && (
-                          <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center">
-                            <div className="w-16 h-16 rounded-full border-2 border-[#8075FF] border-t-transparent animate-spin mb-4"></div>
-                            <p className="text-[#121F3D] dark:text-white font-medium">{processingStep}</p>
-                            <div className="w-48 mt-2">
-                              <Progress value={processingProgress} className="h-1.5" />
-                            </div>
+                        {/* Combined Uploading/Processing Indicator */}
+                         {(isUploading || isProcessing) && (
+                          <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
+                            <div className="w-16 h-16 rounded-full border-4 border-white border-t-[#8075FF] animate-spin mb-4"></div>
+                             <p className="text-white font-medium mb-2">
+                                {isUploading ? "Uploading Image..." : processingStep}
+                            </p>
+                             {isProcessing && !isUploading && ( // Only show progress bar during AI processing
+                                <div className="w-48 mt-2">
+                                <Progress value={processingProgress} className="h-1.5" />
+                                </div>
+                            )}
                           </div>
                         )}
                       </div>
 
-                      {!isProcessing && (
+                      {/* Show remove button only if NOT uploading/processing */}
+                       {!isUploading && !isProcessing && uploadedImage && (
                         <Button
                           variant="outline"
                           size="icon"
-                          className="absolute top-0 right-0 rounded-full bg-black/50 border-white/20 text-[#121F3D] dark:text-white hover:bg-black/70"
-                          onClick={() => setUploadedImage(null)}
+                           className="absolute -top-2 -right-2 z-10 rounded-full bg-black/50 border-white/20 text-white hover:bg-black/70"
+                          onClick={() => {
+                            setUploadedImage(null);
+                            setImageCid(null); // Clear CID if image is removed
+                             setExtractedData(null); // Clear data if image removed
+                             setIsProcessing(false); // Stop any ongoing processing visual
+                             setProcessingProgress(0);
+                             setUploadError(null); // Clear errors
+                          }}
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -439,7 +664,7 @@ export function CardListingPage() {
           )}
 
           {/* Step 2: Verify Extracted Data */}
-          {currentStep === 2 && extractedData && (
+          {currentStep === 2 && extractedData && imageCid && ( // Ensure imageCid exists before showing Step 2
             <motion.div
               key="step2"
               initial={{ opacity: 0, y: 20 }}
@@ -481,7 +706,8 @@ export function CardListingPage() {
                       variant="outline"
                       size="sm"
                       className="rounded-full border-[#8075FF] text-[#8075FF] hover:bg-[#322F5D]"
-                      onClick={handleProceedToListing}
+                       onClick={handleProceedToListing} // Uses updated handler
+                       disabled={isUploading} // Disable if an upload is somehow still happening
                     >
                       Accept All
                     </Button>
@@ -678,7 +904,8 @@ export function CardListingPage() {
                   <div className="mt-6">
                     <Button
                       className="w-full rounded-full bg-gradient-to-r from-[#8075FF] to-[#6C63FF] hover:from-[#6C63FF] hover:to-[#5D51FF] text-[#121F3D] dark:text-white shadow-[0_0_15px_rgba(108,99,255,0.3)]"
-                      onClick={handleProceedToListing}
+                      //  onClick={handleProceedToListing} // Uses updated handler
+                      //  disabled={isUploading} // Disable if an upload is somehow still happening
                     >
                       Continue to Listing
                     </Button>
@@ -689,7 +916,7 @@ export function CardListingPage() {
           )}
 
           {/* Step 3: Create Listing */}
-          {currentStep === 3 && (
+          {currentStep === 3 && extractedData && imageCid && ( // Ensure imageCid and data exist
             <motion.div
               key="step3"
               initial={{ opacity: 0, y: 20 }}
@@ -929,9 +1156,10 @@ export function CardListingPage() {
 
                     <Button
                       className="w-full rounded-full bg-gradient-to-r from-[#8075FF] to-[#6C63FF] hover:from-[#6C63FF] hover:to-[#5D51FF] text-[#121F3D] dark:text-white shadow-[0_0_15px_rgba(108,99,255,0.3)] py-6 text-lg font-medium"
-                      onClick={handleSubmitListing}
+                       onClick={handleSubmitListing} // Uses updated handler
+                       disabled={isUploading} // Disable button while uploading metadata
                     >
-                      List Card Now
+                       {isUploading ? "Listing..." : "List Card Now"}
                     </Button>
                   </div>
                 </div>

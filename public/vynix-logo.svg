@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M16 2L3 9L16 16L29 9L16 2Z" fill="#6C63FF" fill-opacity="0.8" />
+  <path d="M3 9V23L16 30V16L3 9Z" fill="#6C63FF" fill-opacity="0.6" />
+  <path d="M16 16V30L29 23V9L16 16Z" fill="#6C63FF" fill-opacity="0.4" />
+  <path d="M10 12L16 15L22 12L16 9L10 12Z" fill="white" fill-opacity="0.5" />
+</svg>

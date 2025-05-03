@@ -13,6 +13,7 @@ import { ProfileAbout } from "@/components/profile/profile-about"
 import { ProfileSettings } from "@/components/profile/profile-settings"
 import { cn } from "@/lib/utils"
 import { usePrivy, useWallets } from "@privy-io/react-auth"
+import Link from "next/link"
 
 // Mock user data
 const userData = {
@@ -134,6 +135,7 @@ export function ProfilePage() {
 
           {/* Wallet & Edit Profile */}
           <div className="flex gap-3 ml-auto mt-0 md:mt-2">
+          <Link href={`https://pharosscan.xyz/address/${wallets[0].address}`}>
             <Button
               variant="outline"
               className="rounded-full border-[#E4E1FF] dark:border-[#352F7E] text-[#121F3D]/70 dark:text-[#B6B8CF] hover:bg-[#F9F9FB] dark:hover:bg-[#1A1C36]"
@@ -141,6 +143,7 @@ export function ProfilePage() {
               {displayAddress}
               <ExternalLink className="ml-2 h-3 w-3" />
             </Button>
+            </Link>
             <Button
               variant="outline"
               className="rounded-full border-[#6C63FF] dark:border-[#8075FF] text-[#6C63FF] dark:text-[#8075FF] hover:bg-[#E4E1FF] dark:hover:bg-[#322F5D]"

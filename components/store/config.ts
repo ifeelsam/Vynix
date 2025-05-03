@@ -1,9 +1,8 @@
 import { addRpcUrlOverrideToChain } from '@privy-io/react-auth';
 import {http, createConfig} from '@wagmi/core';
 import { defineChain } from 'viem'
-import { injected, metaMask, safe, walletConnect } from 'wagmi/connectors'
+import { injected, metaMask, safe } from 'wagmi/connectors'
 
-const projectId = 'df1b443fd552341b785dd2ba56fbae1e';
 
 export const pharosDevnet = defineChain({
   id: 50002,
@@ -38,7 +37,6 @@ export const config = createConfig({
     chains: [pharosDevnet],
     connectors: [
       injected(),
-      walletConnect({ projectId }),
       metaMask(),
       safe(),
     ],
