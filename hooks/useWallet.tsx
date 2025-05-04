@@ -1,3 +1,4 @@
+import { config } from "@/components/store/config";
 import { toast } from "sonner";
 import {
   injected,

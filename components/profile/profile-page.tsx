@@ -14,6 +14,7 @@ import { ProfileSettings } from "@/components/profile/profile-settings"
 import { cn } from "@/lib/utils"
 import { usePrivy, useWallets } from "@privy-io/react-auth"
 import Link from "next/link"
+import { useIntegrationStore } from "@/store/useIntegrationStore"
 
 // Mock user data
 const userData = {
@@ -40,6 +41,7 @@ export function ProfilePage() {
   const {user} = usePrivy();
   const {wallets} = useWallets();
   console.log("user", user?.createdAt.getMonth())
+  const {createAndListCard} = useIntegrationStore();
 
   // Handle scroll events to adjust header
   const handleScroll = () => {
@@ -144,6 +146,12 @@ export function ProfilePage() {
               <ExternalLink className="ml-2 h-3 w-3" />
             </Button>
             </Link>
+            {/* <Button
+              variant="outline"
+              className="rounded-full border-[#6C63FF] dark:border-[#8075FF] text-[#6C63FF] dark:text-[#8075FF] hover:bg-[#E4E1FF] dark:hover:bg-[#322F5D]"
+              onClick={async() => await createAndListCard("dawdawd",1)}
+            >
+fafaffafa            </Button> */}
             <Button
               variant="outline"
               className="rounded-full border-[#6C63FF] dark:border-[#8075FF] text-[#6C63FF] dark:text-[#8075FF] hover:bg-[#E4E1FF] dark:hover:bg-[#322F5D]"
