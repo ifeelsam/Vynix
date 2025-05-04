@@ -39,7 +39,7 @@ export function ProfilePage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const {user} = usePrivy();
-  const {wallets} = useWallets();
+  // const {wallets} = useWallets();
   console.log("user", user?.createdAt.getMonth())
   const {createAndListCard} = useIntegrationStore();
 
@@ -64,9 +64,9 @@ export function ProfilePage() {
     : "Loading join date..."; // Or some placeholder
 
   // Check if wallets array has at least one wallet before accessing it
-  const displayAddress = wallets && wallets.length > 0 
-    ? `${wallets[0].address.slice(0, 4)}...${wallets[0].address.slice(-4)}` 
-    : "Loading address..."; // Or some placeholder
+  // const displayAddress = wallets && wallets.length > 0 
+  //   ? `${wallets[0].address.slice(0, 4)}...${wallets[0].address.slice(-4)}` 
+  //   : "Loading address..."; // Or some placeholder
 
   return (
     <div className="min-h-screen pt-32 pb-20 bg-white dark:bg-[#131525] relative overflow-hidden">
@@ -137,15 +137,15 @@ export function ProfilePage() {
 
           {/* Wallet & Edit Profile */}
           <div className="flex gap-3 ml-auto mt-0 md:mt-2">
-          <Link href={`https://pharosscan.xyz/address/${wallets[0].address}`}>
+          {/* <Link href={`https://pharosscan.xyz/address/${wallets[0].address}`}> */}
             <Button
               variant="outline"
               className="rounded-full border-[#E4E1FF] dark:border-[#352F7E] text-[#121F3D]/70 dark:text-[#B6B8CF] hover:bg-[#F9F9FB] dark:hover:bg-[#1A1C36]"
             >
-              {displayAddress}
+              {userData.wallet.address}
               <ExternalLink className="ml-2 h-3 w-3" />
             </Button>
-            </Link>
+            {/* </Link> */}
             {/* <Button
               variant="outline"
               className="rounded-full border-[#6C63FF] dark:border-[#8075FF] text-[#6C63FF] dark:text-[#8075FF] hover:bg-[#E4E1FF] dark:hover:bg-[#322F5D]"
