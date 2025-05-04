@@ -162,7 +162,8 @@ export default function Home() {
                           <Image
                             src={collection.cardImages[0] || "/placeholder.svg?height=84&width=120"}
                             alt="Card"
-                            fill
+                            width={250}
+                            height={350}
                             className="object-cover"
                           />
                         </div>
@@ -821,9 +822,9 @@ const collections = [
     items: "124",
     floor: "1.2 ETH",
     cardImages: [
-      "/placeholder.svg?height=84&width=120",
-      "/placeholder.svg?height=84&width=120",
-      "/placeholder.svg?height=84&width=120",
+      "/alakazam-psychic-power.png",
+      "/blastoise-hydro-pump.png",
+      "/charizard-holo-card.png",
     ],
   },
   {
