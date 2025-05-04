@@ -52,10 +52,7 @@ contract VynixMarket is ERC721URIStorage, Ownable, ReentrancyGuard {
     }
 
     /// @notice Mint a new card to yourself and immediately list it.
-    function createAndListCard(string calldata uri, uint256 price)
-        external
-        returns (uint256)
-    {
+    function createAndListCard(string calldata uri, uint256 price) external returns (uint256) {
         if (price == 0) revert PriceMustBeAboveZero();
 
         // 1) Mint

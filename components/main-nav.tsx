@@ -22,31 +22,30 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { usePrivy } from "@privy-io/react-auth"
+import WalletAdapter from "./walletAdapter"
+import { useWallet } from "@/hooks/useWallet"
 
 export function MainNav() {
   const pathname = usePathname()
   const navItems = [
-    // { name: "Cards", link: "#" },
-    // { name: "Sets", link: "#" },
     { name: "Auctions", link: "#" },
     { name: "Marketplace", link: "/marketplace" },
-    // { name: "Drops", link: "#" },
   ]
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
   const [pftImg, setPfpImg] = useState<string>("https://api.dicebear.com/9.x/glass/svg?seed=Vynix")
 
-  // This would be replaced with actual authentication logic
+  const {connect, disconnect, wallet} = useWallet()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const {login, authenticated, ready, user} = usePrivy()
-  // Toggle authentication for demo purposes
-  const handleLogin = () => login({loginMethods: ["google", "email"]})
+  const handleLogin = () => login({loginMethods: ["google", "email", "wallet"]})
 
   const handleLogout = () => {
     setIsAuthenticated(false)
+    disconnect()
   }
-  let pfpImg;
+  
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node
@@ -55,9 +54,12 @@ export function MainNav() {
         setIsProfileDropdownOpen(false)
       }
     }
-    if (authenticated && ready ){
+    
+    // Set authenticated if either Privy is authenticated or wallet is connected
+    if ((authenticated && ready) || wallet.isConnected) {
        setIsAuthenticated(true)
     }
+    
     if (isProfileDropdownOpen) {
       document.addEventListener("mousedown", handleClickOutside)
     }
@@ -65,7 +67,7 @@ export function MainNav() {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside)
     }
-  }, [isProfileDropdownOpen, authenticated, ready])
+  }, [isProfileDropdownOpen, authenticated, ready, wallet.isConnected])
 
   return (
     <Navbar>
@@ -166,7 +168,7 @@ export function MainNav() {
                   onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
                 >
                     <Image
-                      src={`https://api.dicebear.com/9.x/notionists/svg?seed=${user?.id}`}
+                      src={`https://api.dicebear.com/9.x/notionists/svg?seed=${user?.id || 'wallet-user'}`}
                       alt="Profile"
                       width={36}
                       height={36}
@@ -210,12 +212,7 @@ export function MainNav() {
             <>
               {/* Unauthenticated Actions */}
               <ThemeToggle />
-              <Button
-                className="rounded-full z-20 text-white bg-gradient-to-r from-[#6C63FF] to-[#5D51FF] dark:from-[#8075FF] dark:to-[#6C63FF] hover:from-[#5D51FF] hover:to-[#6C63FF]"
-                onClick={handleLogin}
-              >
-                Get Started
-              </Button>
+              <WalletAdapter/>
             </>
           )}
         </div>
@@ -348,6 +345,7 @@ export function MainNav() {
               >
                 Get Started
               </NavbarButton>
+              <WalletAdapter/>
             </div>
           )}
         </MobileNavMenu>

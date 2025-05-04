@@ -1,4 +1,3 @@
-import { addRpcUrlOverrideToChain } from '@privy-io/react-auth';
 import {http, createConfig} from '@wagmi/core';
 import { defineChain } from 'viem'
 import { injected, metaMask, safe } from 'wagmi/connectors'
@@ -44,8 +43,3 @@ export const config = createConfig({
         [pharosDevnet.id]: http()
     }
 })
-
-export const pharosChainRpc = addRpcUrlOverrideToChain(
-  pharosDevnet, 
-  'https://devnet.dplabs-internal.com'
-);
