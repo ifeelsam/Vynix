@@ -130,7 +130,7 @@ export default function Home() {
       </section>
 
       {/* Featured Collections */}
-      <section className="py-20 px-4 bg-white dark:bg-[#121212]">
+      {/* <section className="py-20 px-4 bg-white dark:bg-[#121212]">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-[#121F3D] dark:text-[#E8E6FF] tracking-tight">
@@ -155,7 +155,7 @@ export default function Home() {
                   <p className="text-[#121F3D]/70 dark:text-[#B6B8CF] text-sm mb-4">{collection.description}</p>
 
                   {/* Card display area with proper aspect ratio */}
-                  <div className="relative h-[140px] mb-6 overflow-hidden">
+                  {/* <div className="relative h-[140px] mb-6 overflow-hidden">
                     <div className="absolute left-[5%] top-[10%] w-[120px] h-[84px] transform rotate-[-8deg] hover:rotate-[-5deg] transition-all duration-300 z-10">
                       <div className="w-full h-full rounded-lg overflow-hidden shadow-md bg-white dark:bg-[#201C4A]">
                         <div className="relative w-full h-full">
@@ -220,10 +220,10 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Latest Drops */}
-      <section className="py-20 px-4 bg-gradient-to-br from-[#F8F9FF] to-[#E4E1FF]/50 dark:from-[#121212] dark:to-[#1A1A1A]">
+      {/* <section className="py-20 px-4 bg-gradient-to-br from-[#F8F9FF] to-[#E4E1FF]/50 dark:from-[#121212] dark:to-[#1A1A1A]">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-[#121F3D] dark:text-[#E8E6FF] tracking-tight">
@@ -244,7 +244,7 @@ export default function Home() {
                 className="rounded-3xl overflow-hidden hover:scale-[1.03] transition-all duration-300 shadow-md dark:shadow-[#352F7E]/20 hover:shadow-lg dark:hover:shadow-[#352F7E]/30 bg-white dark:bg-[#1A1C36] border-0 dark:border dark:border-[#352F7E]/20"
               >
                 {/* Card display with proper aspect ratio */}
-                <div className="relative h-[140px] w-full overflow-hidden bg-[#F8F9FF] dark:bg-[#0C0E1B]">
+               {/* <div className="relative h-[140px] w-full overflow-hidden bg-[#F8F9FF] dark:bg-[#0C0E1B]">
                   <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[180px] h-[126px] hover:scale-105 transition-all duration-500">
                     <div className="w-full h-full rounded-lg overflow-hidden shadow-md dark:shadow-[#352F7E]/30 bg-white dark:bg-[#201C4A]">
                       <div className="relative w-full h-full">
@@ -299,7 +299,7 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Vaulting & Tokenization */}
       <section className="py-20 px-4 bg-white dark:bg-[#0A0A0A]">
@@ -339,7 +339,7 @@ export default function Home() {
       </section>
 
       {/* Live Auctions */}
-      <section className="py-20 px-4 bg-[#121F3D] dark:bg-[#0A0A0A]">
+      {/* <section className="py-20 px-4 bg-[#121F3D] dark:bg-[#0A0A0A]">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white dark:text-[#E8E6FF] tracking-tight">
@@ -360,7 +360,7 @@ export default function Home() {
                 className="rounded-3xl overflow-hidden hover:scale-[1.03] transition-all duration-300 shadow-lg dark:shadow-[#352F7E]/20 hover:shadow-xl dark:hover:shadow-[#352F7E]/30 bg-white/5 dark:bg-[#1A1C36] backdrop-blur-sm border-0 dark:border dark:border-[#352F7E]/20"
               >
                 {/* Card display with proper aspect ratio */}
-                <div className="relative h-[140px] w-full overflow-hidden bg-[#0C0E1B]/50 dark:bg-[#0C0E1B]">
+                {/* <div className="relative h-[140px] w-full overflow-hidden bg-[#0C0E1B]/50 dark:bg-[#0C0E1B]">
                   <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[180px] h-[126px] hover:scale-105 hover:rotate-1 transition-all duration-500">
                     <div className="w-full h-full rounded-lg overflow-hidden shadow-md dark:shadow-[#352F7E]/30 bg-white/10 dark:bg-[#201C4A]">
                       <div className="relative w-full h-full">
@@ -412,8 +412,7 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </section>
-
+      </section> */}
       {/* Card Authentication */}
       <section className="py-20 px-4 bg-white dark:bg-[#121212]">
         <div className="max-w-7xl mx-auto">
@@ -475,7 +474,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 px-4 bg-gradient-to-br from-[#F8F9FF] to-[#E4E1FF]/50 dark:from-[#121212] dark:to-[#1A1A1A]">
+      {/* <section className="py-20 px-4 bg-gradient-to-br from-[#F8F9FF] to-[#E4E1FF]/50 dark:from-[#121212] dark:to-[#1A1A1A]">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-[#121F3D] dark:text-[#E8E6FF] tracking-tight mb-4">
@@ -530,7 +529,7 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Market Insights */}
       <section className="py-20 px-4 bg-white dark:bg-[#0A0A0A]">
@@ -708,7 +707,7 @@ export default function Home() {
                     Cards
                   </Link>
                 </li>
-                <li>
+                {/* <li>
                   <Link
                     href="#"
                     className="text-white/70 dark:text-[#B6B8CF] hover:text-white dark:hover:text-[#E8E6FF]"
@@ -731,7 +730,7 @@ export default function Home() {
                   >
                     Vaulting
                   </Link>
-                </li>
+                </li> */}
                 <li>
                   <Link
                     href="#"
@@ -746,7 +745,7 @@ export default function Home() {
             <div>
               <h4 className="font-bold text-lg mb-4">Support</h4>
               <ul className="space-y-2">
-                <li>
+                {/* <li>
                   <Link
                     href="#"
                     className="text-white/70 dark:text-[#B6B8CF] hover:text-white dark:hover:text-[#E8E6FF]"
@@ -761,7 +760,7 @@ export default function Home() {
                   >
                     FAQs
                   </Link>
-                </li>
+                </li> */}
                 <li>
                   <Link
                     href="#"
@@ -778,14 +777,14 @@ export default function Home() {
                     Terms of Service
                   </Link>
                 </li>
-                <li>
+                {/* <li>
                   <Link
                     href="#"
                     className="text-white/70 dark:text-[#B6B8CF] hover:text-white dark:hover:text-[#E8E6FF]"
                   >
                     Privacy Policy
                   </Link>
-                </li>
+                </li> */}
               </ul>
             </div>
 
