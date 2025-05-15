@@ -1,13 +1,13 @@
 import { config } from "@/components/store/config";
 import { toast } from "sonner";
 import {
-  injected,
   useAccount,
   useBalance,
   useChainId,
   useConnect,
   useDisconnect,
 } from "wagmi";
+import { metaMask } from "wagmi/connectors";
 
 export interface Wallet {
   address: string;
@@ -37,7 +37,7 @@ export const useWallet = () => {
 
   const handleConnect = async () => {
     try {
-      connect({ connector: injected() });
+      connect({ connector: metaMask() });
       if (isSuccess) {
         toast.success('Wallet Connected')
       } 

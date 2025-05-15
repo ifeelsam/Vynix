@@ -36,7 +36,6 @@ export const pharosDevnet = defineChain({
 export const config = createConfig({
     chains: [pharosDevnet],
     connectors: [
-      injected(),
       metaMask(),
       safe(),
     ],
